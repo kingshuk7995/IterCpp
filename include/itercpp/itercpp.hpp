@@ -303,7 +303,7 @@ public:
 template <class Parent, class Func>
 class map_view : public iterator_trait<map_view<Parent, Func>> {
   Parent parent_;
-  Func func_;
+  [[no_unique_address]] Func func_;
 
 public:
   constexpr map_view(Parent parent, Func func)
@@ -348,7 +348,7 @@ public:
 template <class Parent, class Pred>
 class filter_view : public iterator_trait<filter_view<Parent, Pred>> {
   Parent parent_;
-  Pred pred_;
+  [[no_unique_address]] Pred pred_;
 
 public:
   constexpr filter_view(Parent parent, Pred pred)
