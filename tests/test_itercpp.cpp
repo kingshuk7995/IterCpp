@@ -240,3 +240,34 @@ TEST(IterCpp, RobustEdgeCases) {
 }
 
 } // namespace
+
+TEST_F(IterCpp_RobustEdgeCases_Test, RandomAccessPreservation) {
+  std::vector<int> full = {5, 2, 8, 1, 9, 3};
+
+  // Create a map_view that preserves random access
+  auto view = iter(full).map([](int &x) -> int & { return x; });
+
+  // Sort using standard library which requires random access
+  std::sort(view.begin(), view.end());
+
+  // Verify the underlying container is sorted
+  EXPECT_EQ(full[0], 1);
+  EXPECT_EQ(full[1], 2);
+  EXPECT_EQ(full[2], 3);
+  EXPECT_EQ(full[3], 5);
+  EXPECT_EQ(full[4], 8);
+  EXPECT_EQ(full[5], 9);
+
+  // Test zip_view distance and random access
+  std::vector<int> a = {1, 2, 3, 4};
+  std::vector<int> b = {10, 20};
+  auto zv = iter(a).zip(b);
+  auto it = zv.begin();
+  auto end = zv.end();
+
+  EXPECT_EQ(end - it, 2);
+  it += 1;
+  EXPECT_EQ(end - it, 1);
+  EXPECT_EQ((*it).first, 2);
+  EXPECT_EQ((*it).second, 20);
+}

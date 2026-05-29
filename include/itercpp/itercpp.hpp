@@ -314,8 +314,86 @@ public:
     const Func *func_{};
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::random_access_iterator_tag, parent_category>,
+        std::random_access_iterator_tag, parent_category>;
+    constexpr iterator &operator--()
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      --it_;
+      return *this;
+    }
+    constexpr iterator operator--(int)
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    constexpr iterator &operator+=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ += n;
+      return *this;
+    }
+    constexpr iterator operator+(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp += n;
+      return tmp;
+    }
+    friend constexpr iterator operator+(difference_type n, const iterator &i)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return i + n;
+    }
+    constexpr iterator &operator-=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ -= n;
+      return *this;
+    }
+    constexpr iterator operator-(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp -= n;
+      return tmp;
+    }
+    constexpr difference_type operator-(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ - other.it_;
+    }
+    constexpr auto operator[](difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return (*func_)(it_[n]);
+    }
+    constexpr bool operator<(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ < other.it_;
+    }
+    constexpr bool operator>(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ > other.it_;
+    }
+    constexpr bool operator<=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ <= other.it_;
+    }
+    constexpr bool operator>=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ >= other.it_;
+    }
     using reference =
         decltype(std::declval<Func>()(*std::declval<parent_iter_t>()));
     using value_type = std::remove_cvref_t<reference>;
@@ -364,8 +442,12 @@ public:
     }
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::forward_iterator_tag, parent_category>,
+        std::forward_iterator_tag, std::input_iterator_tag>;
     using reference = decltype(*std::declval<parent_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
@@ -416,8 +498,89 @@ public:
     std::size_t remaining_{};
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::random_access_iterator_tag, parent_category>,
+        std::random_access_iterator_tag, parent_category>;
+    constexpr iterator &operator--()
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      --it_;
+      ++remaining_;
+      return *this;
+    }
+    constexpr iterator operator--(int)
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    constexpr iterator &operator+=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ += n;
+      remaining_ -= n;
+      return *this;
+    }
+    constexpr iterator operator+(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp += n;
+      return tmp;
+    }
+    friend constexpr iterator operator+(difference_type n, const iterator &i)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return i + n;
+    }
+    constexpr iterator &operator-=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ -= n;
+      remaining_ += n;
+      return *this;
+    }
+    constexpr iterator operator-(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp -= n;
+      return tmp;
+    }
+    constexpr difference_type operator-(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ - other.it_;
+    }
+    constexpr auto operator[](difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_[n];
+    }
+    constexpr bool operator<(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ < other.it_;
+    }
+    constexpr bool operator>(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ > other.it_;
+    }
+    constexpr bool operator<=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ <= other.it_;
+    }
+    constexpr bool operator>=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ >= other.it_;
+    }
     using reference = decltype(*std::declval<parent_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
@@ -474,8 +637,86 @@ public:
     }
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::random_access_iterator_tag, parent_category>,
+        std::random_access_iterator_tag, parent_category>;
+    constexpr iterator &operator--()
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      --it_;
+      return *this;
+    }
+    constexpr iterator operator--(int)
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    constexpr iterator &operator+=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ += n;
+      return *this;
+    }
+    constexpr iterator operator+(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp += n;
+      return tmp;
+    }
+    friend constexpr iterator operator+(difference_type n, const iterator &i)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return i + n;
+    }
+    constexpr iterator &operator-=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ -= n;
+      return *this;
+    }
+    constexpr iterator operator-(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp -= n;
+      return tmp;
+    }
+    constexpr difference_type operator-(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ - other.it_;
+    }
+    constexpr auto operator[](difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_[n];
+    }
+    constexpr bool operator<(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ < other.it_;
+    }
+    constexpr bool operator>(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ > other.it_;
+    }
+    constexpr bool operator<=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ <= other.it_;
+    }
+    constexpr bool operator>=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ >= other.it_;
+    }
     using reference = decltype(*std::declval<parent_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
@@ -523,8 +764,92 @@ public:
     std::size_t step_{};
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::random_access_iterator_tag, parent_category>,
+        std::random_access_iterator_tag, parent_category>;
+    constexpr iterator &operator--()
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      for (std::size_t i = 0; i < step_; ++i)
+        --it_;
+      return *this;
+    }
+    constexpr iterator operator--(int)
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    constexpr iterator &operator+=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ += n * static_cast<difference_type>(step_);
+      return *this;
+    }
+    constexpr iterator operator+(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp += n;
+      return tmp;
+    }
+    friend constexpr iterator operator+(difference_type n, const iterator &i)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return i + n;
+    }
+    constexpr iterator &operator-=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ -= n * static_cast<difference_type>(step_);
+      return *this;
+    }
+    constexpr iterator operator-(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp -= n;
+      return tmp;
+    }
+    constexpr difference_type operator-(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      difference_type diff = it_ - other.it_;
+      if (diff > 0)
+        return (diff + step_ - 1) / static_cast<difference_type>(step_);
+      if (diff < 0)
+        return (diff - step_ + 1) / static_cast<difference_type>(step_);
+      return 0;
+    }
+    constexpr auto operator[](difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_[n * static_cast<difference_type>(step_)];
+    }
+    constexpr bool operator<(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ < other.it_;
+    }
+    constexpr bool operator>(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ > other.it_;
+    }
+    constexpr bool operator<=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ <= other.it_;
+    }
+    constexpr bool operator>=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ >= other.it_;
+    }
     using reference = decltype(*std::declval<parent_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
@@ -579,8 +904,12 @@ public:
     }
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::forward_iterator_tag, parent_category>,
+        std::forward_iterator_tag, std::input_iterator_tag>;
     using reference = decltype(*std::declval<parent_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
@@ -636,8 +965,12 @@ public:
     }
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::forward_iterator_tag, parent_category>,
+        std::forward_iterator_tag, std::input_iterator_tag>;
     using reference = decltype(*std::declval<parent_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
@@ -687,8 +1020,89 @@ public:
     std::size_t index_{};
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using parent_category =
+        typename std::iterator_traits<parent_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::random_access_iterator_tag, parent_category>,
+        std::random_access_iterator_tag, parent_category>;
+    constexpr iterator &operator--()
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      --it_;
+      --index_;
+      return *this;
+    }
+    constexpr iterator operator--(int)
+      requires std::bidirectional_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    constexpr iterator &operator+=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ += n;
+      index_ += n;
+      return *this;
+    }
+    constexpr iterator operator+(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp += n;
+      return tmp;
+    }
+    friend constexpr iterator operator+(difference_type n, const iterator &i)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return i + n;
+    }
+    constexpr iterator &operator-=(difference_type n)
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      it_ -= n;
+      index_ -= n;
+      return *this;
+    }
+    constexpr iterator operator-(difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      iterator tmp = *this;
+      tmp -= n;
+      return tmp;
+    }
+    constexpr difference_type operator-(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ - other.it_;
+    }
+    constexpr auto operator[](difference_type n) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return std::pair<std::size_t, decltype(it_[n])>{index_ + n, it_[n]};
+    }
+    constexpr bool operator<(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ < other.it_;
+    }
+    constexpr bool operator>(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ > other.it_;
+    }
+    constexpr bool operator<=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ <= other.it_;
+    }
+    constexpr bool operator>=(const iterator &other) const
+      requires std::random_access_iterator<parent_iter_t>
+    {
+      return it_ >= other.it_;
+    }
     using reference =
         std::pair<std::size_t, decltype(*std::declval<parent_iter_t>())>;
     using value_type = std::remove_cvref_t<reference>;
@@ -740,8 +1154,118 @@ public:
     right_iter_t end_r_{};
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using left_category =
+        typename std::iterator_traits<left_iter_t>::iterator_category;
+    using right_category =
+        typename std::iterator_traits<right_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::random_access_iterator_tag, left_category> &&
+            std::is_base_of_v<std::random_access_iterator_tag, right_category>,
+        std::random_access_iterator_tag,
+        std::conditional_t<
+            std::is_base_of_v<std::bidirectional_iterator_tag, left_category> &&
+                std::is_base_of_v<std::bidirectional_iterator_tag,
+                                  right_category>,
+            std::bidirectional_iterator_tag, std::forward_iterator_tag>>;
+
+    constexpr iterator &operator--()
+      requires(std::bidirectional_iterator<left_iter_t> &&
+               std::bidirectional_iterator<right_iter_t>)
+    {
+      --it_l_;
+      --it_r_;
+      return *this;
+    }
+    constexpr iterator operator--(int)
+      requires(std::bidirectional_iterator<left_iter_t> &&
+               std::bidirectional_iterator<right_iter_t>)
+    {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    constexpr iterator &operator+=(difference_type n)
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      it_l_ += n;
+      it_r_ += n;
+      return *this;
+    }
+    constexpr iterator operator+(difference_type n) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      iterator tmp = *this;
+      tmp += n;
+      return tmp;
+    }
+    friend constexpr iterator operator+(difference_type n, const iterator &i)
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      return i + n;
+    }
+    constexpr iterator &operator-=(difference_type n)
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      it_l_ -= n;
+      it_r_ -= n;
+      return *this;
+    }
+    constexpr iterator operator-(difference_type n) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      iterator tmp = *this;
+      tmp -= n;
+      return tmp;
+    }
+    constexpr difference_type operator-(const iterator &other) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      difference_type diff_l = it_l_ - other.it_l_;
+      difference_type diff_r = it_r_ - other.it_r_;
+      if (diff_l >= 0 && diff_r >= 0)
+        return std::min(diff_l, diff_r);
+      if (diff_l <= 0 && diff_r <= 0)
+        return std::max(diff_l, diff_r);
+      return diff_l;
+    }
+    constexpr auto operator[](difference_type n) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      return std::pair<decltype(it_l_[n]), decltype(it_r_[n])>{it_l_[n],
+                                                               it_r_[n]};
+    }
+    constexpr bool operator<(const iterator &other) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      return (*this - other) < 0;
+    }
+    constexpr bool operator>(const iterator &other) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      return (*this - other) > 0;
+    }
+    constexpr bool operator<=(const iterator &other) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      return (*this - other) <= 0;
+    }
+    constexpr bool operator>=(const iterator &other) const
+      requires(std::random_access_iterator<left_iter_t> &&
+               std::random_access_iterator<right_iter_t>)
+    {
+      return (*this - other) >= 0;
+    }
     using reference = std::pair<decltype(*std::declval<left_iter_t>()),
                                 decltype(*std::declval<right_iter_t>())>;
     using value_type = std::remove_cvref_t<reference>;
@@ -798,8 +1322,15 @@ public:
     right_iter_t end_r_{};
 
   public:
-    using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
+    using left_category =
+        typename std::iterator_traits<left_iter_t>::iterator_category;
+    using right_category =
+        typename std::iterator_traits<right_iter_t>::iterator_category;
+    using iterator_category = std::conditional_t<
+        std::is_base_of_v<std::forward_iterator_tag, left_category> &&
+            std::is_base_of_v<std::forward_iterator_tag, right_category>,
+        std::forward_iterator_tag, std::input_iterator_tag>;
     using reference = decltype(*std::declval<left_iter_t>());
     using value_type = std::remove_cvref_t<reference>;
     using pointer = void;
