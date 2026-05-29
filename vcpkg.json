@@ -1,0 +1,8 @@
+{
+  "name": "itercpp",
+  "version-string": "0.1.0",
+  "description": "Header-only lazy iterator pipelines for C++23 inspired by Rust's iterators",
+  "dependencies": [
+    "gtest"
+  ]
+}
